@@ -1,14 +1,11 @@
-from lib.yts_api import YTSAPI
-from lib.imdb_helper import IMDbHelper
-import imdb
-import certifi
+from search.search import MovieService
 
-imdb = imdb.IMDb()
-imdb_help = IMDbHelper()
-yts = YTSAPI(verify_ssl=True, custom_ca_bundle=certifi.where())
+movies = MovieService().search_movies("The Matrix")
 
-k = input("Enter a movie name: ")
+print(MovieService().get_movie_details(movies[0].movieID))
 
-items = imdb.get_imdbID()
-for i in items:
-    print(i)
+# def main():
+#     print("Hello World")
+#
+# if __name__ == "__main__":
+#     main()
