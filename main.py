@@ -1,4 +1,4 @@
-from search.search import MovieService
+from modules.search import MovieService
 from arguments.args import arguments, parser
 
 movies = MovieService().search_movies("The Matrix")
