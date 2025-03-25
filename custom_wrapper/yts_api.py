@@ -1,7 +1,8 @@
+import certifi
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-import certifi
+
 
 class YTSAPI:
     BASE_URL = "https://yts.mx/api/v2/"
@@ -83,21 +84,37 @@ class YTSAPI:
         }
         return self._make_request("list_movies.json", params=params)
 
-    def movie_details(self, movie_id, with_images=False, with_cast=False):
+    def movie_details(self, movie_id, imdb, with_images=False, with_cast=False):
         """
         Get details for a specific movie.
 
         :param movie_id: The ID of the movie.
+        :param imdb: Use IMDB ID instead of YTS ID (default: True).
         :param with_images: Include images in the response (default: False).
         :param with_cast: Include cast details in the response (default: False).
         :return: JSON response or None if the request fails.
         """
         params = {
-            "movie_id": movie_id,
             "with_images": with_images,
             "with_cast": with_cast
         }
-        return self._make_request("movie_details.json", params=params)
+
+        if imdb is True:
+            params["imdb_id"] = movie_id
+        else:
+            params["movie_id"] = movie_id
+
+        try:
+            data = self._make_request("movie_details.json", params=params)
+        except requests.exceptions.ConnectionError:
+            raise Exception("Error making request to YTS API. Check your internet connection and try again.")
+
+        if data is None:
+            raise Exception("Error in getting movie details.")
+        elif data["data"]["movie"]["imdb_code"] == "tt":
+            raise Exception("Movie is not available on YTS.")
+        else:
+            return data
 
     def movie_suggestions(self, movie_id):
         """
@@ -178,4 +195,3 @@ class YTSAPI:
         for tracker in trackers:
             magnet_url += f"&tr={tracker}"
         return magnet_url
-
